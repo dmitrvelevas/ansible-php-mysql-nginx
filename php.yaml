@@ -47,14 +47,14 @@
          pkg: mysql-server 
          state: present
          
-   - name: Config nginx and php
+   - name: Config nginx
      block:
-      - name: Change nginx default config
+      - name: Copy php.conf
         template:
           src: php.conf.j2
           dest: /etc/nginx/sites-available/php.conf
           mode: '0644'
-      - name: Create a symbolic link
+      - name: Create a symbolic link to php.conf
         file:
           src: /etc/nginx/sites-available/php.conf
           dest: /etc/nginx/sites-enabled/default
