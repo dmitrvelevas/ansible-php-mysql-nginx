@@ -65,7 +65,7 @@
           dest: /var/www/html/info.php
           mode: '0644'
       - name: Reload nginx
-        ansible.builtin.systemd_service:
+        systemd_service:
           name: nginx.service
           state: reloaded
           
