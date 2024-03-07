@@ -5,9 +5,11 @@
     pakages:
             - lsb-release
             - gnupg
-            - nginx
-            - php
-      
+            - debconf-utils
+            #- nginx
+            #- php
+  
+  
 
   tasks:
    - name: Install standard utilities
@@ -22,24 +24,52 @@
 
    - name: Install mysql-server
      block:
-      - name: Set to generate locales
+      #- name: Set to generate locales
+      #  debconf:
+      #    name: mysql-apt-config
+      #    question: locales/locales_to_be_generated
+      #    value: en_US.UTF-8 UTF-8, ru_RU.UTF-8 UTF-8
+      #    vtype: multiselect
+      - name: Set to generate locales 2
         debconf:
           name: mysql-apt-config
-          question: locales/locales_to_be_generated
-          value: en_US.UTF-8 UTF-8, fr_FR.UTF-8 UTF-8
-          vtype: multiselect
-      - name: Install mysql apt repository
+          question: mysql-apt-config/select-preview
+          value: Disabled
+          vtype: select
+      - name: Set to generate locales 3
+        debconf:
+          name: mysql-apt-config
+          question: mysql-apt-config/select-product
+          value: Ok
+          vtype: select
+      - name: Set to generate locales 4
+        debconf:
+          name: mysql-apt-config
+          question: mysql-apt-config/select-server
+          value: mysql-8.0
+          vtype: select
+      - name: Set to generate locales 6
+        debconf:
+          name: mysql-apt-config
+          question: mysql-apt-config/select-tools
+          value: Enabled
+          vtype: select
+      - name: Set to generate locales 5
+        debconf:
+          name: mysql-apt-config
+          question: mysql-apt-config/unsupported-platform
+          value: abort
+          vtype: select
+      - name: Export env
+        shell: export DEBIAN_FRONTEND=noninteractive; wget https://dev.mysql.com/get/mysql-apt-config_0.8.29-1_all.deb; dpkg -i mysql-apt-config_0.8.29-1_all.deb
+      - name: Apt update
         apt:
-          deb: https://dev.mysql.com/get/mysql-apt-config_0.8.29-1_all.deb 
-        environment: 
-          DEBIAN_FRONTEND: noninteractive
+          update_cache: yes 
       - name: Install install
         apt:
          pkg: mysql-server 
          state: present
 
-
-debconf-set-selections
 
    
 
