@@ -6,8 +6,9 @@
             - lsb-release
             - gnupg
             - debconf-utils
-            #- nginx
-            #- php
+            - nginx
+            - php
+            - php-fpm
   
   
 
@@ -24,51 +25,50 @@
 
    - name: Install mysql-server
      block:
-      #- name: Set to generate locales
-      #  debconf:
-      #    name: mysql-apt-config
-      #    question: locales/locales_to_be_generated
-      #    value: en_US.UTF-8 UTF-8, ru_RU.UTF-8 UTF-8
-      #    vtype: multiselect
-      - name: Set to generate locales 2
-        debconf:
-          name: mysql-apt-config
-          question: mysql-apt-config/select-preview
-          value: Disabled
-          vtype: select
-      - name: Set to generate locales 3
+      - name: Debconf field 1
         debconf:
           name: mysql-apt-config
           question: mysql-apt-config/select-product
           value: Ok
           vtype: select
-      - name: Set to generate locales 4
+      - name: Debconf field 2
         debconf:
           name: mysql-apt-config
           question: mysql-apt-config/select-server
           value: mysql-8.0
           vtype: select
-      - name: Set to generate locales 6
-        debconf:
-          name: mysql-apt-config
-          question: mysql-apt-config/select-tools
-          value: Enabled
-          vtype: select
-      - name: Set to generate locales 5
-        debconf:
-          name: mysql-apt-config
-          question: mysql-apt-config/unsupported-platform
-          value: abort
-          vtype: select
-      - name: Export env
+      - name: Install mysql repository
         shell: export DEBIAN_FRONTEND=noninteractive; wget https://dev.mysql.com/get/mysql-apt-config_0.8.29-1_all.deb; dpkg -i mysql-apt-config_0.8.29-1_all.deb
       - name: Apt update
         apt:
           update_cache: yes 
-      - name: Install install
+      - name: Install server
         apt:
          pkg: mysql-server 
          state: present
+         
+   - name: Config nginx and php
+     block:
+      - name: Change nginx default config
+        template:
+          src: php.conf.j2
+          dest: /etc/nginx/sites-available/php.conf
+          mode: '0644'
+      - name: Create a symbolic link
+        file:
+          src: /etc/nginx/sites-available/php.conf
+          dest: /etc/nginx/sites-enabled/default
+          state: link
+      - name: Copy info.php
+        copy:
+          src: info.php
+          dest: /var/www/html/info.php
+          mode: '0644'
+      - name: Reload nginx
+        ansible.builtin.systemd_service:
+          name: nginx.service
+          state: reloaded
+          
 
 
    
