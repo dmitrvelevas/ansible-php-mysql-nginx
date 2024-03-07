@@ -1,0 +1,1 @@
+test-vm ansible_host=192.168.1.64 ansible_user=root ansible_password=root5

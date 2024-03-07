@@ -1,0 +1,47 @@
+- name: test-task
+  hosts: test-vm
+  become: yes
+  vars:
+    pakages:
+            - lsb-release
+            - gnupg
+            - nginx
+            - php
+      
+
+  tasks:
+   - name: Install standard utilities
+     block:
+      - name: Apt update
+        apt:
+          update_cache: yes 
+      - name: Apt install
+        apt:
+          pkg: "{{ pakages }}" 
+          state: present
+
+   - name: Install mysql-server
+     block:
+      - name: Set to generate locales
+        debconf:
+          name: mysql-apt-config
+          question: locales/locales_to_be_generated
+          value: en_US.UTF-8 UTF-8, fr_FR.UTF-8 UTF-8
+          vtype: multiselect
+      - name: Install mysql apt repository
+        apt:
+          deb: https://dev.mysql.com/get/mysql-apt-config_0.8.29-1_all.deb 
+        environment: 
+          DEBIAN_FRONTEND: noninteractive
+      - name: Install install
+        apt:
+         pkg: mysql-server 
+         state: present
+
+
+debconf-set-selections
+
+   
+
+
+
